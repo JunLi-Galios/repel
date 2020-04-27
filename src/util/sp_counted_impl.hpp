@@ -25,7 +25,7 @@
 #endif
 
 #include <boost/checked_delete.hpp>
-#include <boost/detail/sp_counted_base.hpp>
+#include "sp_counted_base.hpp"
 
 #if defined(BOOST_SP_USE_QUICK_ALLOCATOR)
 #include <boost/detail/quick_allocator.hpp>
