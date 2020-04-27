@@ -30,7 +30,7 @@
 #include <boost/checked_delete.hpp>
 #include <boost/throw_exception.hpp>
 #include "shared_count.hpp"
-#include "workaround.hpp
+#include "workaround.hpp"
 #include "sp_convertible.hpp"
 
 #if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
