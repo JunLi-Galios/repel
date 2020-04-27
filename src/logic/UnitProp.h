@@ -8,7 +8,6 @@
 #ifndef UNIT_PROP_H_
 #define UNIT_PROP_H_
 
-#include <boost/shared_ptr.hpp>
 #include "../util/shared_ptr.hpp"
 #include <utility>
 #include <queue>
