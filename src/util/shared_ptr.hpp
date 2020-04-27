@@ -29,7 +29,7 @@
 #include <boost/assert.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/detail/shared_count.hpp>
+#include "shared_count.hpp"
 #include <boost/detail/workaround.hpp>
 #include <boost/detail/sp_convertible.hpp>
 
