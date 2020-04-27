@@ -22,7 +22,7 @@
 //
 
 #include <boost/config.hpp>
-#include <boost/detail/spinlock.hpp>
+#include "spinlock.hpp"
 #include <cstddef>
 
 namespace boost
