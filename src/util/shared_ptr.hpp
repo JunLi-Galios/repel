@@ -17,7 +17,7 @@
 #include <boost/config.hpp>   // for broken compiler workarounds
 
 #if defined(BOOST_NO_MEMBER_TEMPLATES) && !defined(BOOST_MSVC6_MEMBER_TEMPLATES)
-#include <boost/detail/shared_ptr_nmt.hpp>
+#include "shared_ptr_nmt.hpp"
 #else
 
 // In order to avoid circular dependencies with Boost.TR1
@@ -34,7 +34,7 @@
 #include "sp_convertible.hpp"
 
 #if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
-#include <boost/detail/spinlock_pool.hpp>
+#include "spinlock_pool.hpp"
 #include <boost/memory_order.hpp>
 #endif
 
