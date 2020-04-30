@@ -541,7 +541,7 @@ bool equalByInterval(const SISet& a, const SISet& b) {
     }
     for (std::list<SpanInterval>::const_iterator it = b.set_.begin(); it != b.set_.end(); it++) {
         SpanInterval si = *it;
-        aIntervals.insert(si.begin(), si.end());
+        bIntervals.insert(si.begin(), si.end());
     }
 
     if (    std::includes(aIntervals.begin(), aIntervals.end(),
