@@ -1,0 +1,63 @@
+# test formulas file
+#
+# format is: "weight: formula". 
+# Symbols:
+#   Atom: pred(constant, ..., constant)
+#     currently variables are not working (neither are types)
+#   Negation: ! or ~
+#   Disjunction: v or |
+#   Implication: -> or =>
+#   LiquidOp: [ <subformula ]
+#   Conjunction: ^{<relations>} or &{relations}
+#     with no relation given, defaults to = relation
+#     ";" is an alias for ^{m}
+#     multiple relations are separated by commas, ie P(x) ^{m,mi} Q(x)
+#   Diamond: <>{<relations>} <atom>
+#     note that diamondop has pretty high precedence so you may need ()s
+#     relations are specified as before
+#        
+
+inf: D-Hit(Left,Red,Blue) -> Hit(Left,Red,Blue)
+inf: D-Hit(Right,Red,Blue) -> Hit(Right,Red,Blue)
+inf: D-Mouth(Left,Red) -> Mouth(Left,Red)
+inf: D-Mouth(Left,Blue) -> Mouth(Left,Blue)
+inf: D-Mouth(Right,Red) -> Mouth(Right,Red)
+inf: D-Mouth(Right,Blue) -> Mouth(Right,Blue)
+inf: D-Hold(Left,Red) -> Hold(Left,Red)
+inf: D-Hold(Left,Blue) -> Hold(Left,Blue)
+inf: D-Hold(Right,Red) -> Hold(Right,Red)
+inf: D-Hold(Right,Blue) -> Hold(Right,Blue)
+inf: D-Press(Left,Red,Blue) -> Press(Left,Red,Blue)
+inf: D-Press(Right,Red,Blue) -> Press(Right,Red,Blue)
+inf: D-Press(Left,Blue,Red) -> Press(Left,Blue,Red)
+inf: D-Press(Right,Blue,Red) -> Press(Right,Blue,Red)
+
+inf: Hit(Left,Red,Blue) -> D-Hit(Left,Red,Blue)
+inf: Hit(Right,Red,Blue) -> D-Hit(Right,Red,Blue)
+inf: Mouth(Left,Red) -> D-Mouth(Left,Red)
+inf: Mouth(Left,Blue) -> D-Mouth(Left,Blue)
+inf: Mouth(Right,Red) -> D-Mouth(Right,Red)
+inf: Mouth(Right,Blue) -> D-Mouth(Right,Blue)
+inf: Hold(Left,Red) -> D-Hold(Left,Red)
+inf: Hold(Left,Blue) -> D-Hold(Left,Blue)
+inf: Hold(Right,Red) -> D-Hold(Right,Red)
+inf: Hold(Right,Blue) -> D-Hold(Right,Blue)
+inf: Press(Left,Red,Blue) -> D-Press(Left,Red,Blue)
+inf: Press(Right,Red,Blue) -> D-Press(Right,Red,Blue)
+inf: Press(Left,Blue,Red) -> D-Press(Left,Blue,Red)
+inf: Press(Right,Blue,Red) -> D-Press(Right,Blue,Red)
+
+inf: Hit(Left,Red,Blue) -> Hold(Left,Red)
+inf: Hit(Left,Blue,Red) -> Hold(Left,Blue)
+inf: Hit(Right,Red,Blue) -> Hold(Right,Red)
+inf: Hit(Right,Blue,Red) -> Hold(Right,Blue)
+inf: Mouth(Left,Red) -> Hold(Left,Red)
+inf: Mouth(Left,Blue) -> Hold(Left,Blue)
+inf: Mouth(Right,Red) -> Hold(Right,Red)
+inf: Mouth(Right,Blue) -> Hold(Right,Blue)
+inf: Press(Left,Red,Blue) -> Hold(Left,Red)
+inf: Press(Right,Red,Blue) -> Hold(Right,Red)
+inf: Press(Left,Blue,Red) -> Hold(Left,Blue)
+inf: Press(Right,Blue,Red) -> Hold(Right,Blue)
+
+
