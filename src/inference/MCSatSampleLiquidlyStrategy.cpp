@@ -31,6 +31,8 @@ void MCSatSampleLiquidlyStrategy::sampleSentences(const Model& m, const Domain& 
             continue;
         }
         SISet satisfied = curSentence.dSatisfied(m, d);
+        
+        // TODO by Jun: Do we need to change satisfied to be force_liquid
 
         double prob = 1.0 - exp(-(double)(curSentence.weight()));   // probability to sample an interval
         SISet where(true, d.maxInterval());
