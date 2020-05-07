@@ -12,7 +12,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/serialization/export.hpp>
 
-
+//Check if all terms are constants
 bool Atom::isGrounded() const {
     for (boost::ptr_vector<Term>::const_iterator it = terms.begin(); it != terms.end(); it++) {
         if (dynamic_cast<const Constant*>(&(*it)) == NULL) return false;
