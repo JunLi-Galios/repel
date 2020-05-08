@@ -795,9 +795,9 @@ void parseEventFile(const std::string &filename,
         throw e;
     }
     std::vector<FOLToken> tokens = FOLParse::tokenize(file);
-    BOOST_FOREACH(FOLToken token, tokens) {
-      std::cout << "type: " << token.type() <<  " contents: " << token.contents() << std::endl;
-    }
+//     BOOST_FOREACH(FOLToken token, tokens) {
+//       std::cout << "type: " << token.type() <<  " contents: " << token.contents() << std::endl;
+//     }
 
     iters<std::vector<FOLToken>::const_iterator > its(tokens.begin(), tokens.end());
     try {
