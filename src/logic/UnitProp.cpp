@@ -44,7 +44,7 @@ Domain performUnitPropagation(const Domain& d) {
         it++;
     }
     
-    //consist of unit clauses that are not disjunctions
+    //pair<clauseslist, SISet>, clauseslist consists of unit clauses that are not disjunctions
     QCNFClauseList clauses = convertToQCNFClauseList(upforms);
 
     // convert all the facts into unit clauses
