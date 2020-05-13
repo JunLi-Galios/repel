@@ -110,6 +110,7 @@ QUnitsFormulasPair performUnitPropagation(const QCNFClauseList& sentences) {
 
     // first, do a scan over the sentences, collecting unit clauses and collecting which atoms occur in each sentence
     QCNFLiteralList unitClauses;
+    //unitClauses consists of unit clause
     splitUnitClauses(formulas, unitClauses);
     LOG(LOG_DEBUG) << "found " << unitClauses.size() << " unit clauses.";
 
