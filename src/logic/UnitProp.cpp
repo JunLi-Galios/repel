@@ -118,6 +118,7 @@ QUnitsFormulasPair performUnitPropagation(const QCNFClauseList& sentences) {
     // detect inconsistencies
     boost::unordered_map<Proposition, SISet> partialModel;
     // ensure we have no contradictions at this point
+    // check whether every unit clause and its negation have intersection
     enforceUnitProps(unitClauses, partialModel);
 
     QCNFLiteralList propagatedUnitClauses;
