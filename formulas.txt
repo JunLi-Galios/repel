@@ -17,6 +17,8 @@
 #     relations are specified as before
 #        
 
+type: Hand = (Left,Right,Both)
+
 inf: D-Eating(Gary) -> Eating(Gary)
 inf: D-Walking(Gary) -> Walking(Gary)
 inf: D-Driving(Gary) -> Driving(Gary)
