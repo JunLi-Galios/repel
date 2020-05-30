@@ -262,15 +262,15 @@ void doParseType(std::map<std::string, std::set<std::string> >& objTypes,
 template <class ForwardIterator>
 void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::set<std::string> >& objTypes,
         std::map<std::string, std::vector<std::string> >& predTypes, iters<ForwardIterator> &its) {
-    cout << "enter doParseFormulas" << std::endl;
+    std::cout << "enter doParseFormulas" << std::endl;
     while (!endOfTokens(its)) {
         if (peekTokenType(FOLParse::EndLine, its)) {
             consumeTokenType(FOLParse::EndLine, its);
         } else if (peekTokenType(FOLParse::Var, its)) {
-            cout << "find type token" << std::endl;
+            std::cout << "find type token" << std::endl;
             doParseType(objTypes, predTypes, its);
         } else {
-            cout << "start parse event" << std::endl;
+            std::cout << "start parse event" << std::endl;
             ELSentence formula = doParseWeightedFormula(its);
             store.push_back(formula);
         }
