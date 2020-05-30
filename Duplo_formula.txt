@@ -2,7 +2,7 @@
 #
 # format is: "weight: formula". 
 # Symbols:
-#   type: Variable = value,value,...,value
+#   type: Name = value,value,...,value
 #   Atom: pred(constant/?variable:num, ..., constant/?variable:num)
 #     currently variables are not working (neither are types)
 #   Negation: ! or ~
