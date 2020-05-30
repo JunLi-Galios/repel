@@ -836,7 +836,7 @@ void parseFormulaFile(const std::string &filename,
 
 template <class ForwardIterator>
 void parseFormulas(const ForwardIterator &first,
-        const ForwardIterator &last, std::set<std::string> >& objTypes,
+        const ForwardIterator &last, std::map<std::string, std::set<std::string> >& objTypes,
         std::map<std::string, std::vector<std::string> >& predTypes, std::vector<ELSentence>& store) {
     iters<std::vector<FOLToken>::const_iterator> its(first, last);
     doParseFormulas(store, objTypes, predTypes, its);
