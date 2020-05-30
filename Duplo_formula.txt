@@ -2,7 +2,7 @@
 #
 # format is: "weight: formula". 
 # Symbols:
-#   var: Variable = value,value,...,value
+#   type: Variable = value,value,...,value
 #   Atom: pred(constant/?variable:num, ..., constant/?variable:num)
 #     currently variables are not working (neither are types)
 #   Negation: ! or ~
@@ -18,8 +18,8 @@
 #     relations are specified as before
 #        
 
-var: Hand = Left,Right,Both
-var: Duplo = Red,Blue,Green,Yellow,Orange,White,Light Blue
+type: Hand = Left,Right,Both
+type: Duplo = Red,Blue,Green,Yellow,Orange,White,Light Blue
 
 inf: D-Hit(?Hand:1,?Duplo:1,?Duplo:2) -> Hit(?Hand:1,?Duplo:1,?Duplo:2)
 inf: D-Mouth(?Hand:1,?Duplo:1) -> Mouth(?Hand:1,?Duplo:1)
