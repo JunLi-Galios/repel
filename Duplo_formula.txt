@@ -28,5 +28,5 @@ inf: D-Press(?Hand:1,?Duplo:1,?Duplo:2) -> Press(?Hand:1,?Duplo:1,?Duplo:2)
 inf: D-Shake(?Hand:1,?Duplo:1) -> Shake(?Hand:1,?Duplo:1)
 inf: D-Move(?Hand:1,?Duplo:1) -> Move(?Hand:1,?Duplo:1)
 
-inf: Press(?Hand,?Duplo:1,?Duplo:2) -> <>{m}Interlock(?Duplo:1,?Duplo:2)
+inf: Press(?Hand:*,?Duplo:1,?Duplo:2) -> <>{m}Interlock(?Duplo:1,?Duplo:2)
 inf: Flush(?Duplo:1,?Duplo:2) V Dangle(?Duplo:1,?Duplo:2) -> Interlock(?Duplo:1,?Duplo:2) 
