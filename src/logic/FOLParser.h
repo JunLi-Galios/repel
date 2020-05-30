@@ -260,10 +260,13 @@ void doParseType(std::map<std::string, std::set<std::string> >& objTypes,
 }
 
 template <class ForwardIterator>
-void doParseFormulas(std::vector<ELSentence>& store, iters<ForwardIterator> &its) {
+void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::set<std::string> >& objTypes,
+        std::map<std::string, std::vector<std::string> >& predTypes, iters<ForwardIterator> &its) {
     while (!endOfTokens(its)) {
         if (peekTokenType(FOLParse::EndLine, its)) {
             consumeTokenType(FOLParse::EndLine, its);
+        } else if (peekTokenType(FOLParse::Var, its)) {
+            doParseType(objTypes, predTypes, its);
         } else {
             ELSentence formula = doParseWeightedFormula(its);
             store.push_back(formula);
@@ -822,7 +825,7 @@ void parseFormulaFile(const std::string &filename,
     std::vector<FOLToken> tokens = FOLParse::tokenize(file);
     iters<std::vector<FOLToken>::const_iterator> its(tokens.begin(), tokens.end());
     try {
-        doParseFormulas(store, its);
+        doParseFormulas(store, objTypes, predTypes, its);
     } catch (bad_parse& e) {
         e.details += "filename: " + filename + "\n";
         file.close();
