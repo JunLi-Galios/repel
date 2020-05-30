@@ -2,7 +2,8 @@
 #
 # format is: "weight: formula". 
 # Symbols:
-#   Atom: pred(constant, ..., constant)
+#   var: Variable = value,value,...,value
+#   Atom: pred(constant/?variable:num, ..., constant/?variable:num)
 #     currently variables are not working (neither are types)
 #   Negation: ! or ~
 #   Disjunction: v or |
@@ -17,47 +18,15 @@
 #     relations are specified as before
 #        
 
-inf: D-Hit(Left,Red,Blue) -> Hit(Left,Red,Blue)
-inf: D-Hit(Right,Red,Blue) -> Hit(Right,Red,Blue)
-inf: D-Mouth(Left,Red) -> Mouth(Left,Red)
-inf: D-Mouth(Left,Blue) -> Mouth(Left,Blue)
-inf: D-Mouth(Right,Red) -> Mouth(Right,Red)
-inf: D-Mouth(Right,Blue) -> Mouth(Right,Blue)
-inf: D-Hold(Left,Red) -> Hold(Left,Red)
-inf: D-Hold(Left,Blue) -> Hold(Left,Blue)
-inf: D-Hold(Right,Red) -> Hold(Right,Red)
-inf: D-Hold(Right,Blue) -> Hold(Right,Blue)
-inf: D-Press(Left,Red,Blue) -> Press(Left,Red,Blue)
-inf: D-Press(Right,Red,Blue) -> Press(Right,Red,Blue)
-inf: D-Press(Left,Blue,Red) -> Press(Left,Blue,Red)
-inf: D-Press(Right,Blue,Red) -> Press(Right,Blue,Red)
+var: Hand = Left,Right,Both
+var: Duplo = Red,Blue,Green,Yellow,Orange,White,Light Blue
 
-inf: Hit(Left,Red,Blue) -> D-Hit(Left,Red,Blue)
-inf: Hit(Right,Red,Blue) -> D-Hit(Right,Red,Blue)
-inf: Mouth(Left,Red) -> D-Mouth(Left,Red)
-inf: Mouth(Left,Blue) -> D-Mouth(Left,Blue)
-inf: Mouth(Right,Red) -> D-Mouth(Right,Red)
-inf: Mouth(Right,Blue) -> D-Mouth(Right,Blue)
-inf: Hold(Left,Red) -> D-Hold(Left,Red)
-inf: Hold(Left,Blue) -> D-Hold(Left,Blue)
-inf: Hold(Right,Red) -> D-Hold(Right,Red)
-inf: Hold(Right,Blue) -> D-Hold(Right,Blue)
-inf: Press(Left,Red,Blue) -> D-Press(Left,Red,Blue)
-inf: Press(Right,Red,Blue) -> D-Press(Right,Red,Blue)
-inf: Press(Left,Blue,Red) -> D-Press(Left,Blue,Red)
-inf: Press(Right,Blue,Red) -> D-Press(Right,Blue,Red)
+inf: D-Hit(?Hand:1,?Duplo:1,?Duplo:2) -> Hit(?Hand:1,?Duplo:1,?Duplo:2)
+inf: D-Mouth(?Hand:1,?Duplo:1) -> Mouth(?Hand:1,?Duplo:1)
+inf: D-Hold(?Hand:1,?Duplo:1) -> Hold(?Hand:1,?Duplo:1)
+inf: D-Press(?Hand:1,?Duplo:1,?Duplo:2) -> Press(?Hand:1,?Duplo:1,?Duplo:2)
+inf: D-Shake(?Hand:1,?Duplo:1) -> Shake(?Hand:1,?Duplo:1)
+inf: D-Move(?Hand:1,?Duplo:1) -> Move(?Hand:1,?Duplo:1)
 
-inf: Hit(Left,Red,Blue) -> Hold(Left,Red)
-inf: Hit(Left,Blue,Red) -> Hold(Left,Blue)
-inf: Hit(Right,Red,Blue) -> Hold(Right,Red)
-inf: Hit(Right,Blue,Red) -> Hold(Right,Blue)
-inf: Mouth(Left,Red) -> Hold(Left,Red)
-inf: Mouth(Left,Blue) -> Hold(Left,Blue)
-inf: Mouth(Right,Red) -> Hold(Right,Red)
-inf: Mouth(Right,Blue) -> Hold(Right,Blue)
-inf: Press(Left,Red,Blue) -> Hold(Left,Red)
-inf: Press(Right,Red,Blue) -> Hold(Right,Red)
-inf: Press(Left,Blue,Red) -> Hold(Left,Blue)
-inf: Press(Right,Blue,Red) -> Hold(Right,Blue)
-
-
+inf: Press(?Hand,?Duplo:1,?Duplo:2) -> Interlock(?Duplo:1,?Duplo:2)
+inf: Flush(?Duplo:1,?Duplo:2) V Dangle(?Duplo:1,?Duplo:2) -> Interlock(?Duplo:1,?Duplo:2) 
