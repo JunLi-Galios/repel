@@ -267,7 +267,7 @@ void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::
     while (!endOfTokens(its)) {
         if (peekTokenType(FOLParse::EndLine, its)) {
             consumeTokenType(FOLParse::EndLine, its);
-        } else if (peekTokenType(FOLParse::Var, its)) {
+        } else if (peekTokenType(FOLParse::Type, its)) {
             std::cout << "find type token" << std::endl;
             doParseType(objTypes, predTypes, its);
         } else {
