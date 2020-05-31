@@ -262,7 +262,6 @@ void doParseType(std::map<std::string, std::set<std::string> >& objTypes,
 template <class ForwardIterator>
 void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::set<std::string> >& objTypes,
         std::map<std::string, std::vector<std::string> >& predTypes, iters<ForwardIterator> &its) {
-    std::cout << "enter doParseFormulas" << std::endl;
     while (!endOfTokens(its)) {
         if (peekTokenType(FOLParse::EndLine, its)) {
             consumeTokenType(FOLParse::EndLine, its);
@@ -854,6 +853,11 @@ Domain loadDomainFromFiles(const std::string &eventfile, const std::string &form
     std::cout << "Read " << events.size() << " events from file." << std::endl;
     parseFormulaFile(formulafile, formSet, objTypes, predTypes);
     std::cout << "Read " << formSet.size() << " formulas from file." << std::endl;
+    
+    for(map<string, std::set<std::string> >::const_iterator it = objTypes.begin();
+        it != objTypes.end(); ++it) {
+            std::cout << it->first << " " << it->second.first << " " << it->second.second << "\n";
+    }
 
     Domain d;
     boost::unordered_set<Atom> factAtoms;   // collect the fact atoms
