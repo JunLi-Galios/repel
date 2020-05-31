@@ -854,7 +854,7 @@ Domain loadDomainFromFiles(const std::string &eventfile, const std::string &form
     parseFormulaFile(formulafile, formSet, objTypes, predTypes);
     std::cout << "Read " << formSet.size() << " formulas from file." << std::endl;
     
-    for(map<string, std::set<std::string> >::const_iterator it = objTypes.begin();
+    for(std::map<string, std::set<std::string> >::const_iterator it = objTypes.begin();
         it != objTypes.end(); ++it) {
             std::cout << it->first << " " << it->second.first << " " << it->second.second << "\n";
     }
