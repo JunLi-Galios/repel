@@ -856,7 +856,7 @@ Domain loadDomainFromFiles(const std::string &eventfile, const std::string &form
     
     for(std::map<std::string, std::set<std::string> >::const_iterator it = objTypes.begin();
         it != objTypes.end(); ++it) {
-            std::cout << it->first << " " << it->second << std::endl;
+            std::cout << it->first << std::endl;
     }
 
     Domain d;
