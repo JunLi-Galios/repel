@@ -1,4 +1,4 @@
-# test formulas file
+# Duplo formulas file
 #
 # format is: "weight: formula". 
 # Symbols:
