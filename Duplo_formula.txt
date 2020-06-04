@@ -19,7 +19,7 @@
 #        
 
 type: Hand = {Left,Right,Both}
-type: Duplo = {Red,Blue,Green,Yellow,Orange,White,Light Blue}
+type: Duplo = {Red,Blue,Green,Yellow,Orange,White,LightBlue}
 
 inf: D-Hit(?Hand:1,?Duplo:1,?Duplo:2) -> Hit(?Hand:1,?Duplo:1,?Duplo:2)
 inf: D-Mouth(?Hand:1,?Duplo:1) -> Mouth(?Hand:1,?Duplo:1)
