@@ -598,6 +598,8 @@ std::set<Interval::INTERVAL_RELATION> doParseRelationList(iters<ForwardIterator>
             // add all relations
             relations.insert(Interval::MEETS);
             relations.insert(Interval::MEETSI);
+            relations.insert(Interval::UMEETS);
+            relations.insert(Interval::UMEETSI);
             relations.insert(Interval::OVERLAPS);
             relations.insert(Interval::OVERLAPSI);
             relations.insert(Interval::STARTS);
@@ -656,6 +658,10 @@ Interval::INTERVAL_RELATION doParseRelation(iters<ForwardIterator>& its) {
             return Interval::OVERLAPS;
         } else if (str == "oi") {
             return Interval::OVERLAPSI;
+        } else if (str == "um") {
+            return Interval::UMEETS;
+        } else if (str == "umi") {
+            return Interval::UMEETSI;
         } else {
             // no more matches!
             bad_parse p;
