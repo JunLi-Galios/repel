@@ -16,6 +16,10 @@ std::string relationToString(Interval::INTERVAL_RELATION rel) {
         return "m";
     case Interval::MEETSI:
         return "mi";
+    case Interval::UMEETS:
+        return "um";
+    case Interval::UMEETSI:
+        return "umi";
     case Interval::DURING:
         return "d";
     case Interval::DURINGI:
@@ -50,6 +54,10 @@ Interval::INTERVAL_RELATION inverseRelation(Interval::INTERVAL_RELATION rel) {
             return Interval::MEETSI;
         case Interval::MEETSI:
             return Interval::MEETS;
+        case Interval::UMEETS:
+            return Interval::UMEETSI;
+        case Interval::UMEETSI:
+            return Interval::UMEETS;
         case Interval::DURING:
             return Interval::DURINGI;
         case Interval::DURINGI:
@@ -102,8 +110,10 @@ bool relationHolds(const Interval& a, Interval::INTERVAL_RELATION rel, const Int
         case Interval::OVERLAPSI:
             return overlapsI(a, b);
         case Interval::MEETS:
+        case Interval::UMEETS:
             return meets(a, b);
         case Interval::MEETSI:
+        case Interval::UMEETSI:
             return meetsI(a, b);
         case Interval::LESSTHAN:
             return before(a, b);
