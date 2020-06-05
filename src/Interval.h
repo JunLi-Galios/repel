@@ -33,7 +33,9 @@ public:
         FINISHESI,
         EQUALS,
         GREATERTHAN,
-        LESSTHAN
+        LESSTHAN,
+        UMEETS,
+        UMEETSI
     };
 
     /**
