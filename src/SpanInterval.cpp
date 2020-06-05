@@ -54,12 +54,20 @@ boost::optional<SpanInterval> SpanInterval::satisfiesRelation(Interval::INTERVAL
             if (l == pos_inf)
                 return SpanInterval(k+1, pos_inf, neg_inf, pos_inf).normalize();
             return SpanInterval(k+1, l+1, neg_inf, pos_inf).normalize();
+        case Interval::UMEETS:
+            if (l == pos_inf)
+                return boost::optional<SpanInterval>();
+            return SpanInterval(l+1, l+1, neg_inf, pos_inf).normalize();
         case Interval::MEETSI:
             if (j == neg_inf)
                 return boost::optional<SpanInterval>();
             if (i == neg_inf)
                 return SpanInterval(neg_inf, pos_inf, neg_inf, j-1).normalize();
             return SpanInterval(neg_inf, pos_inf, i-1, j-1).normalize();
+        case Interval::UMEETSI:
+            if (i == neg_inf)
+                return boost::optional<SpanInterval>();
+            return SpanInterval(neg_inf, pos_inf, i-1, i-1).normalize();
         case Interval::OVERLAPS:
             if (k == pos_inf || i == pos_inf) return boost::optional<SpanInterval>();
             if (i == k) {
