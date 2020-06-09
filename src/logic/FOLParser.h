@@ -268,10 +268,87 @@ void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::
         } else if (peekTokenType(FOLParse::Type, its)) {
             doParseType(objTypes, predTypes, its);
         } else {
-            ELSentence formula = doParseWeightedFormula(its);
-            store.push_back(formula);
+            std::vector<std::vector<FOLToken> > tokenslist = parse_variable_tokens(objTypes, its);
+            for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
+                iters<std::vector<FOLToken>::const_iterator> it2(it1->begin(), it1->end());
+                ELSentence formula = doParseWeightedFormula(it2);
+                store.push_back(formula);
+            }
         }
     }
+}
+    
+template <class ForwardIterator>
+std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, std::set<std::string> >& objTypes, iters<ForwardIterator> &its) {
+    std::vector<std::vector<FOLToken> > tokenslist;
+    std::map<Variable, std::set<std::string> > & predTypes;
+    
+    while (!endOfTokens(its)){
+        if (peekTokenType(FOLParse::EndLine, its)){
+            break;
+        } else {
+            if (tokenslist.size() == 0) {
+                std::vector<FOLToken> tokens;
+                tokenslist.push_back(tokens);
+            }
+            if (peekTokenType(FOLParse::Variable, its)){
+                std::string var_name = consumeVariable(its);
+                std::set<std::string> var_values = objTypes[var_name];
+                
+                consumeTokenType(FOLParse::Colon, its);
+                if (peekTokenType(FOLParse::Star, its)) {
+                    consumeTokenType(FOLParse::Star, its);
+                    std::vector<std::vector<FOLToken> > tokenslist_copy;
+                    for (std::vector<FOLToken>::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
+                        for (std::set<std::string>::iterator it2 = var_values.begin(); it2 != var_values.end(); ++it2) {
+                            FOLToken token;
+                            std::vector<FOLToken> tokens_copy(*it1);
+                            std::string ident = *it2;
+                            token.setType(FOLParse::Identifier);
+                            token.setContents(ident);
+                            tokens_copy.push_back(token);
+                            tokenslist_copy.push_back(tokens_copy);                      
+                        }                        
+                    }                    
+                    tokenslist = tokenslist_copy;         
+                } else {
+                    unsigned int num = consumeNumber(its);
+                    Variable var_token(var_name, num);
+                    if (predTypes.find(var_token) != predTypes.end()) {
+                        std::vector<std::string> idents = predTypes.find(var_token)->second;                    
+                        for (std::vector<FOLToken>::iterator it1 = tokenslist.begin(), std::vector<std::string>::iterator it2 = idents.begin(); it1 != tokenslist.end() || it2 != idents.end() ; ++it1, ++it2) {
+                            FOLToken token;
+                            token.setType(FOLParse::Identifier);
+                            token.setContents(*it2);
+                            it1->push_back(token);
+                        }
+                    } else {
+                        std::vector<std::vector<FOLToken> > tokenslist_copy;
+                        std::vector<std::string> pred_values;
+                        for (std::vector<FOLToken>::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
+                            for (std::set<std::string>::iterator it2 = var_values.begin(); it2 != var_values.end(); ++it2) {
+                                FOLToken token;
+                                std::vector<FOLToken> tokens_copy(*it1);
+                                std::string ident = *it2;
+                                pred_values.push_back(ident);
+                                token.setType(FOLParse::Identifier);
+                                token.setContents(ident);
+                                tokens_copy.push_back(token);
+                                tokenslist_copy.push_back(tokens_copy);                      
+                            }                        
+                        }
+                        predTypes[var_token] = pred_values;
+                        tokenslist = tokenslist_copy;      
+                    }
+                }                
+            } else {
+                for (std::vector<FOLToken>::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){                    
+                        it1->push_back(*its);
+                }
+            }
+        }        
+    }
+    return tokenslist;
 }
 
 /*
