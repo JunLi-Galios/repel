@@ -29,7 +29,10 @@ private:
     virtual bool doEquals(const Term& t) const;
     virtual std::size_t doHash() const;
     std::string name_;
+    bool operator==(const Variable& l, const Variable& r);
+    bool operator!=(const Variable& l, const Variable& r);
 };
+
 
 inline std::size_t Variable::doHash() const {return hash_value(*this);}
 
@@ -38,6 +41,9 @@ inline std::size_t hash_value(const Variable& v) {
     boost::hash<std::string> hasher;
     return hasher(v.name_);
 }
+
+inline bool operator==(const Variable& lhs, const Variable& rhs) {return (lhs.name_ == rhs.name_ && lhs.id_ == rhs.id_);}
+inline bool operator!=(const Variable& lhs, const Variable& rhs) {return !operator==(lhs, rhs);}
 
 template <class Archive>
 void Variable::serialize(Archive& ar, const unsigned int version) {
