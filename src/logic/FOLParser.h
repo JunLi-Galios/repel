@@ -339,8 +339,9 @@ void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::
             doParseType(objTypes, predTypes, its);
         } else {
             std::vector<std::vector<FOLToken> > tokenslist = parse_variable_tokens(objTypes, its);
+            std::cout << "num of formulas = " << tokenslist.size() << std::endl;
             for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
-                iters<std::vector<FOLToken>::iterator> it2(it1->begin(), it1->end());
+                iters<std::vector<FOLToken>::iterator> it2(it1->begin(), it1->end());                
                 ELSentence formula = doParseWeightedFormula(it2);
                 store.push_back(formula);
             }
@@ -354,7 +355,9 @@ std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, 
     std::map<Variable, std::vector<std::string> > predTypes;
     
     while (!endOfTokens(its)){
+        std::cout << "current token = " << its.cur->contents() << std::endl;
         if (peekTokenType(FOLParse::EndLine, its)){
+            consumeTokenType(FOLParse::EndLine, its);
             break;
         } else {
             if (tokenslist.size() == 0) {
@@ -363,45 +366,67 @@ std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, 
             }
             if (peekTokenType(FOLParse::Variable, its)){
                 std::string var_name = consumeVariable(its);
-                std::set<std::string> var_values = objTypes[var_name];
+                std::cout << "line 369 num of formulas = " << tokenslist.size() << std::endl;
+                std::set<std::string> var_values = objTypes.find(var_name)->second;
+                std::cout << "line 371 num of formulas = " << tokenslist.size() << std::endl;
                 
                 consumeTokenType(FOLParse::Colon, its);
+                std::cout << "line 374 num of formulas = " << tokenslist.size() << std::endl;
                 if (peekTokenType(FOLParse::Star, its)) {
                     consumeTokenType(FOLParse::Star, its);
+                    std::cout << "line 377 num of formulas = " << tokenslist.size() << std::endl;
                     std::vector<std::vector<FOLToken> > tokenslist_copy;
                     for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
                         for (std::set<std::string>::iterator it2 = var_values.begin(); it2 != var_values.end(); ++it2) {
+                            std::cout << "line 381 num of formulas = " << tokenslist.size() << std::endl;
                             FOLToken token;
                             std::vector<FOLToken> tokens_copy(*it1);
                             std::string ident = *it2;
                             token.setType(FOLParse::Identifier);
+                            std::cout << "line 385 num of formulas = " << tokenslist.size() << std::endl;
                             token.setContents(ident);
                             tokens_copy.push_back(token);
-                            tokenslist_copy.push_back(tokens_copy);                      
+                            tokenslist_copy.push_back(tokens_copy);
+                            std::cout << "line 390 num of formulas = " << tokenslist.size() << std::endl;
                         }                        
                     }                    
-                    tokenslist = tokenslist_copy;         
+                    tokenslist = tokenslist_copy;
+                    std::cout << "line 394 num of formulas = " << tokenslist.size() << std::endl;
                 } else {
                     unsigned int num = consumeNumber(its);
                     Variable var_token(var_name, num);
+                    std::cout << "line 398 num of formulas = " << tokenslist.size() << std::endl;
                     if (predTypes.find(var_token) != predTypes.end()) {
                         std::vector<std::string> idents = predTypes.find(var_token)->second;   
-                       // int a = 0;
+                        std::cout << "line 401 num of formulas = " << tokenslist.size() << std::endl;
                         std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin();
-                        std::vector<std::string>::iterator  it2 = idents.begin(); 
+                        std::vector<std::string>::iterator  it3 = idents.begin(); 
                         for (;
-                        it1 != tokenslist.end() || it2 != idents.end() ; 
-                        ++it1, ++it2) {
+                        it1 != tokenslist.end() || it3 != idents.end() ; 
+                        ++it1, ++it3) {
+                            std::cout << "line 407 num of formulas = " << tokenslist.size() << "num of idents = " << idents.size() << std::endl;
+                            std::cout << "line 408 *it2 = " << *it3 << std::endl;
                             FOLToken token;
                             token.setType(FOLParse::Identifier);
-                            token.setContents(*it2);
+                            token.setContents(*it3);
                             it1->push_back(token);
                         }
+                        std::cout << "line 413 num of formulas = " << tokenslist.size() << std::endl;
                     } else {
                         std::vector<std::vector<FOLToken> > tokenslist_copy;
+//                         std::map<Variable, std::vector<std::string> > predTypes_copy;
+                        for (std::map<Variable, std::vector<std::string> >::iterator it4=predTypes.begin(); it4!=predTypes.end(); ++it4){
+                            std::vector<std::string> str_vec;
+                            for (std::vector<std::string>::iterator i5=it4->second.begin(); i5!=it4->second.end(); ++i5){
+                                for (std::size_t i = 0; i < var_values.size(); ++i){
+                                    str_vec.push_back(*i5);
+                                }
+                            }                            
+                            predTypes[it4->first] = str_vec;
+                        }
                         std::vector<std::string> pred_values;
                         for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
-                            for (std::set<std::string>::iterator  it2 = var_values.begin(); it2 != var_values.end(); ++it2) {
+                            for (std::set<std::string>::iterator it2 = var_values.begin(); it2 != var_values.end(); ++it2) {                                
                                 FOLToken token;
                                 std::vector<FOLToken> tokens_copy(*it1);
                                 std::string ident = *it2;
@@ -413,16 +438,20 @@ std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, 
                             }                        
                         }
                         predTypes[var_token] = pred_values;
-                        tokenslist = tokenslist_copy;      
+                        tokenslist = tokenslist_copy;
+                        std::cout << "line 421 num of formulas = " << tokenslist.size() << std::endl;
                     }
                 }                
             } else {
+                std::cout << "line 425 num of formulas = " << tokenslist.size() << std::endl;
                 for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){                    
                         it1->push_back(*(its.cur));
                 }
+                its.cur++;
             }
         }        
     }
+    std::cout << "line 432 num of formulas = " << tokenslist.size() << std::endl;
     return tokenslist;
 }
 
