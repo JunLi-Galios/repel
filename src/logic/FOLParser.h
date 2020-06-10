@@ -260,6 +260,75 @@ void doParseType(std::map<std::string, std::set<std::string> >& objTypes,
     }
 }
 
+
+template <class ForwardIterator>
+ELSentence doParseWeightedFormula(iters<ForwardIterator> &its) {
+    bool hasWeight;
+    double weight;
+    if (peekTokenType(FOLParse::Number, its)) {
+        hasWeight = true;
+        weight = consumeNumber(its);
+        consumeTokenType(FOLParse::Colon, its);
+    } else if (peekTokenType(FOLParse::Float, its)) {
+        hasWeight = true;
+        weight = consumeFloat(its);
+        consumeTokenType(FOLParse::Colon, its);
+
+        //consumeTokenType(FOLParse::Float, its);
+    } else {
+        if (peekTokenType(FOLParse::Infinity, its)) {
+            consumeTokenType(FOLParse::Infinity, its);
+            consumeTokenType(FOLParse::Colon, its);
+        }
+        hasWeight = false;
+        weight = 0.0;
+    }
+    boost::shared_ptr<Sentence> p = doParseFormula(its);
+    ELSentence sentence(p);
+    if (hasWeight) {
+        sentence.setWeight(weight);
+    } else {
+        sentence.setHasInfWeight(true);
+    }
+    // check to see if it's quantified
+    if (peekTokenType(FOLParse::At, its)) {
+        consumeTokenType(FOLParse::At, its);
+        //SISet set;
+        std::vector<SpanInterval> sis;
+        if (peekTokenType(FOLParse::OpenBrace, its)) {
+            consumeTokenType(FOLParse::OpenBrace, its);
+            while (!peekTokenType(FOLParse::CloseBrace, its)) {
+                //SpanInterval si = doParseInterval(its);
+                // normalize it
+                boost::optional<SpanInterval> normSi = doParseInterval(its).normalize();
+                if (normSi) sis.push_back(*normSi);
+                if (!peekTokenType(FOLParse::CloseBrace, its)) {
+                    consumeTokenType(FOLParse::Comma, its);
+                }
+            }
+            consumeTokenType(FOLParse::CloseBrace, its);
+        } else {
+            boost::optional<SpanInterval> normSi = doParseInterval(its).normalize();
+            if (normSi) sis.push_back(*normSi);
+        }
+        if (sis.empty()) {
+            sentence.removeQuantification();
+        } else {
+            find_max_interval maxIntFinder;
+            std::copy(sis.begin(), sis.end(), std::ostream_iterator<SpanInterval>(std::cout, ", "));
+            maxIntFinder = std::for_each(sis.begin(), sis.end(), maxIntFinder);
+            SISet set(false, maxIntFinder.max);
+            for (std::vector<SpanInterval>::const_iterator it = sis.begin(); it != sis.end(); it++) {
+                set.add(*it);
+            }
+            sentence.setQuantification(set);
+        }
+    } else {
+        sentence.removeQuantification();
+    }
+    return sentence;
+}
+    
 template <class ForwardIterator>
 void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::set<std::string> >& objTypes,
         std::map<std::string, std::vector<std::string> >& predTypes, iters<ForwardIterator> &its) {
@@ -271,8 +340,8 @@ void doParseFormulas(std::vector<ELSentence>& store, std::map<std::string, std::
         } else {
             std::vector<std::vector<FOLToken> > tokenslist = parse_variable_tokens(objTypes, its);
             for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
-                iters<std::vector<FOLToken>::const_iterator> it2(it1->begin(), it1->end());
-                ELSentence formula = doParseWeightedFormula((iters<ForwardIterator>)it2);
+                iters<std::vector<FOLToken>::iterator> it2(it1->begin(), it1->end());
+                ELSentence formula = doParseWeightedFormula(it2);
                 store.push_back(formula);
             }
         }
@@ -317,6 +386,7 @@ std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, 
                     Variable var_token(var_name, num);
                     if (predTypes.find(var_token) != predTypes.end()) {
                         std::vector<std::string> idents = predTypes.find(var_token)->second;   
+                       // int a = 0;
                         std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin();
                         std::vector<std::string>::iterator  it2 = idents.begin(); 
                         for (;
@@ -330,8 +400,8 @@ std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, 
                     } else {
                         std::vector<std::vector<FOLToken> > tokenslist_copy;
                         std::vector<std::string> pred_values;
-                        for (std::vector<FOLToken>::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
-                            for (std::vector<std::string>::const_iterator  it2 = var_values.begin(); it2 != var_values.end(); ++it2) {
+                        for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){
+                            for (std::set<std::string>::iterator  it2 = var_values.begin(); it2 != var_values.end(); ++it2) {
                                 FOLToken token;
                                 std::vector<FOLToken> tokens_copy(*it1);
                                 std::string ident = *it2;
@@ -347,8 +417,8 @@ std::vector<std::vector<FOLToken> > parse_variable_tokens(std::map<std::string, 
                     }
                 }                
             } else {
-                for (std::vector<FOLToken>::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){                    
-                        it1->push_back(*its);
+                for (std::vector<std::vector<FOLToken> >::iterator it1 = tokenslist.begin(); it1 != tokenslist.end(); ++it1){                    
+                        it1->push_back(*(its.cur));
                 }
             }
         }        
@@ -517,73 +587,6 @@ boost::shared_ptr<Atom> doParseAtom(iters<ForwardIterator> &its) {
     return a;
 }
 
-template <class ForwardIterator>
-ELSentence doParseWeightedFormula(iters<ForwardIterator> &its) {
-    bool hasWeight;
-    double weight;
-    if (peekTokenType(FOLParse::Number, its)) {
-        hasWeight = true;
-        weight = consumeNumber(its);
-        consumeTokenType(FOLParse::Colon, its);
-    } else if (peekTokenType(FOLParse::Float, its)) {
-        hasWeight = true;
-        weight = consumeFloat(its);
-        consumeTokenType(FOLParse::Colon, its);
-
-        //consumeTokenType(FOLParse::Float, its);
-    } else {
-        if (peekTokenType(FOLParse::Infinity, its)) {
-            consumeTokenType(FOLParse::Infinity, its);
-            consumeTokenType(FOLParse::Colon, its);
-        }
-        hasWeight = false;
-        weight = 0.0;
-    }
-    boost::shared_ptr<Sentence> p = doParseFormula(its);
-    ELSentence sentence(p);
-    if (hasWeight) {
-        sentence.setWeight(weight);
-    } else {
-        sentence.setHasInfWeight(true);
-    }
-    // check to see if it's quantified
-    if (peekTokenType(FOLParse::At, its)) {
-        consumeTokenType(FOLParse::At, its);
-        //SISet set;
-        std::vector<SpanInterval> sis;
-        if (peekTokenType(FOLParse::OpenBrace, its)) {
-            consumeTokenType(FOLParse::OpenBrace, its);
-            while (!peekTokenType(FOLParse::CloseBrace, its)) {
-                //SpanInterval si = doParseInterval(its);
-                // normalize it
-                boost::optional<SpanInterval> normSi = doParseInterval(its).normalize();
-                if (normSi) sis.push_back(*normSi);
-                if (!peekTokenType(FOLParse::CloseBrace, its)) {
-                    consumeTokenType(FOLParse::Comma, its);
-                }
-            }
-            consumeTokenType(FOLParse::CloseBrace, its);
-        } else {
-            boost::optional<SpanInterval> normSi = doParseInterval(its).normalize();
-            if (normSi) sis.push_back(*normSi);
-        }
-        if (sis.empty()) {
-            sentence.removeQuantification();
-        } else {
-            find_max_interval maxIntFinder;
-            std::copy(sis.begin(), sis.end(), std::ostream_iterator<SpanInterval>(std::cout, ", "));
-            maxIntFinder = std::for_each(sis.begin(), sis.end(), maxIntFinder);
-            SISet set(false, maxIntFinder.max);
-            for (std::vector<SpanInterval>::const_iterator it = sis.begin(); it != sis.end(); it++) {
-                set.add(*it);
-            }
-            sentence.setQuantification(set);
-        }
-    } else {
-        sentence.removeQuantification();
-    }
-    return sentence;
-}
 
 template <class ForwardIterator>
 boost::shared_ptr<Sentence> doParseFormula(iters<ForwardIterator> &its) {
