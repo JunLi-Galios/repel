@@ -28,13 +28,31 @@ std::string TQConstraints::toString() const {
 }
 
 bool isDisjunctionOfPELCNFLiterals(const Sentence& s) {
-    if (s.getTypeCode() != Disjunction::TypeCode) return false;
+    if (s.getTypeCode() != Disjunction::TypeCode) {
+        LOG(LOG_WARN) << "sentence: \"" << s.toString() << "\". type is not Disjunction";
+        return false;
+    }
     const Disjunction& dis = static_cast<const Disjunction&>(s);
+    
+    if (!isPELCNFLiteral(*dis.left())){
+        LOG(LOG_WARN) << "left sentence: \"" << dis.left()->toString() << "\". is not PELCNFLiteral";
+    }
+    if (!isDisjunctionOfPELCNFLiterals(*dis.left())){
+        LOG(LOG_WARN) << "left sentence: \"" << dis.left()->toString() << "\". is not DisjunctionOfPELCNFLiterals";
+    }
+    if (!isPELCNFLiteral(*dis.right())){
+        LOG(LOG_WARN) << "right sentence: \"" << dis.right()->toString() << "\". is not PELCNFLiteral";
+    }
+    if (!isDisjunctionOfPELCNFLiterals(*dis.right())){
+        LOG(LOG_WARN) << "right sentence: \"" << dis.right()->toString() << "\". is not DisjunctionOfPELCNFLiterals";
+    }
 
     if ((isPELCNFLiteral(*dis.left()) || isDisjunctionOfPELCNFLiterals(*dis.left()))
             && (isPELCNFLiteral(*dis.right()) || isDisjunctionOfPELCNFLiterals(*dis.right()))) {
+        LOG(LOG_WARN) << "sentence: \"" << s.toString() << "\". is DisjunctionOfPELCNFLiterals";
         return true;
     }
+    LOG(LOG_WARN) << "sentence: \"" << s.toString() << "\". is not DisjunctionOfPELCNFLiterals";
     return false;
 }
 
@@ -48,7 +66,16 @@ bool isPELCNFLiteral(const Sentence& sentence) {
         const Negation& neg = static_cast<const Negation&>(sentence);
 
         // TODO: necessary to check for double negation?
-        if (neg.sentence()->getTypeCode() == Negation::TypeCode) return false;
+        if (neg.sentence()->getTypeCode() == Negation::TypeCode){
+            const Negation& neg_neg = static_cast<const Negation&>(*neg.sentence());
+            if (neg_neg.sentence()->getTypeCode() == Atom::TypeCode
+            || neg_neg.sentence()->getTypeCode() == BoolLit::TypeCode
+            || neg_neg.sentence()->getTypeCode() == LiquidOp::TypeCode
+            || neg_neg.sentence()->getTypeCode() == DiamondOp::TypeCode){
+                return true;
+            }
+            return false;
+        } 
         return isPELCNFLiteral(*neg.sentence());
     }
     if (sentence.getTypeCode() == DiamondOp::TypeCode) {
