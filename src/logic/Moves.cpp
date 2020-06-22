@@ -1013,6 +1013,8 @@ std::vector<Move> findMovesFor(const Domain& d, const Model& m, const ELSentence
     return moves;
 }
 
+
+
 std::vector<Move> findMovesForPELCNFLiteral(const Domain& d, const Model& m, const Sentence &s, const SpanInterval& si, boost::mt19937& rng) {
     std::vector<Move> moves;
     // check for simple literal - either an atom or a negation applied to an atom
@@ -1051,6 +1053,81 @@ std::vector<Move> findMovesForPELCNFLiteral(const Domain& d, const Model& m, con
             moves.push_back(move);
             return moves;
         }
+        if (const Negation* nn = dynamic_cast<const Negation*>(&*n->sentence())) {
+            if (const Atom* a = dynamic_cast<const Atom*>(&*nn->sentence())) {
+                // add it from si
+                Move move;
+                if (d.isLiquid(a->name()) && !si.isLiquid()) {
+                    SpanInterval si2(si.start().start(), si.finish().finish(), si.start().start(), si.finish().finish());
+                    move.toAdd.push_back(boost::make_tuple(*a, si2));
+                } else {
+                    move.toAdd.push_back(boost::make_tuple(*a, si));
+                }
+                moves.push_back(move);
+                return moves;
+            }
+            if (const DiamondOp* dia = dynamic_cast<const DiamondOp*>(&*nn->sentence())) {
+                if (dia->relations().size() == 13) {
+                    const Atom* a = dynamic_cast<const Atom*>(&*dia->sentence());
+                    if (a) {
+                        // We've got !<>{*}, this is easy
+                        Move move;
+                        SpanInterval everywhere(d.maxInterval(), d.maxInterval());
+                        move.toAdd.push_back(boost::make_tuple(*a, everywhere));
+                        moves.push_back(move);
+                        return moves;
+                    }
+                }
+                if (dia->relations().size() > 1) {
+                    // TODO: this is a poor way to handle this
+                    // ASSUME for now that our moves are all disjoint!  probably not a valid assumption, but need to do something here...
+                    Move move;
+                    BOOST_FOREACH(Interval::INTERVAL_RELATION rel, dia->relations()) {
+                        boost::optional<SpanInterval> siRel = si.satisfiesRelation(inverseRelation(rel), d.maxSpanInterval());
+                        boost::shared_ptr<Sentence> insideClone(dia->sentence()->clone());
+                        boost::shared_ptr<Negation> negatedInside(new Negation(insideClone));
+                        if (siRel) {
+                            std::vector<Move> localMoves = findMovesForPELCNFLiteral(d, m, *negatedInside->sentence(), siRel.get(), rng);
+                            BOOST_FOREACH(Move localMove, localMoves) {
+                                move.toAdd.insert(move.toAdd.end(), localMove.toAdd.begin(), localMove.toAdd.end());
+                                move.toDel.insert(move.toAdd.end(), localMove.toDel.begin(), localMove.toDel.end());
+                            }
+                        }
+                        moves.push_back(move);
+                        return moves;
+                    }
+                    //LOG_PRINT(LOG_ERROR) << "currently cannot handle moves for diamond ops with multiple relations!";
+                    //throw std::runtime_error("unimplemented moves found");
+                }
+                if (dia->relations().size() == 0) return moves;
+                // OK, we've got !<>{r} (phi), whether phi is liquid or an atom it should be relatively the same
+                boost::optional<SpanInterval> si2Opt = si.satisfiesRelation(inverseRelation(*dia->relations().begin()), d.maxSpanInterval());
+                if (!si2Opt) return moves;      // no moves available
+                SpanInterval si2 = si2Opt.get();
+                if (const Atom* a = dynamic_cast<const Atom*>(&*dia->sentence())) {
+                    Move move;
+                    if (d.isLiquid(a->name()) && !si2.isLiquid()) {
+                        SpanInterval si3(si2.start().start(), si2.finish().finish(), si2.start().start(), si2.finish().finish());
+                        move.toDel.push_back(boost::make_tuple(*a, si3));
+                    } else {
+                        move.toDel.push_back(boost::make_tuple(*a, si2));
+                    }
+                    moves.push_back(move);
+                    return moves;
+                } else if (const LiquidOp* liq = dynamic_cast<const LiquidOp*>(&*dia->sentence())) {
+                    // normally we can't do this, but slip a negation inside the liquid op since its equivalent
+                    boost::shared_ptr<Sentence> insideLiq(liq->sentence()->clone());
+                    boost::shared_ptr<Sentence> negInsideLiq(new Negation(insideLiq));
+                    // by adding this negation we need to ensure it's moved in
+                    negInsideLiq = moveNegationsInward(negInsideLiq);
+            //      boost::shared_ptr<Sentence> newLiq(new LiquidOp(negInsideLiq));
+                    // satisfy this liq operation now
+                    std::vector<Move> localMoves = findMovesForLiquid(d, m, *negInsideLiq, si2);
+                    moves.insert(moves.begin(), localMoves.begin(), localMoves.end());
+                    return moves;
+                }
+            }
+        }
         if (const DiamondOp* dia = dynamic_cast<const DiamondOp*>(&*n->sentence())) {
             if (dia->relations().size() == 13) {
                 const Atom* a = dynamic_cast<const Atom*>(&*dia->sentence());
@@ -1064,25 +1141,14 @@ std::vector<Move> findMovesForPELCNFLiteral(const Domain& d, const Model& m, con
                 }
             }
             if (dia->relations().size() > 1) {
-                // TODO: this is a poor way to handle this
-                // ASSUME for now that our moves are all disjoint!  probably not a valid assumption, but need to do something here...
-                Move move;
+                // calculate the moves for each one
                 BOOST_FOREACH(Interval::INTERVAL_RELATION rel, dia->relations()) {
-                    boost::optional<SpanInterval> siRel = si.satisfiesRelation(inverseRelation(rel), d.maxSpanInterval());
-                    boost::shared_ptr<Sentence> insideClone(dia->sentence()->clone());
-                    boost::shared_ptr<Negation> negatedInside(new Negation(insideClone));
-                    if (siRel) {
-                        std::vector<Move> localMoves = findMovesForPELCNFLiteral(d, m, *negatedInside->sentence(), siRel.get(), rng);
-                        BOOST_FOREACH(Move localMove, localMoves) {
-                            move.toAdd.insert(move.toAdd.end(), localMove.toAdd.begin(), localMove.toAdd.end());
-                            move.toDel.insert(move.toAdd.end(), localMove.toDel.begin(), localMove.toDel.end());
-                        }
-                    }
-                    moves.push_back(move);
-                    return moves;
+                    boost::shared_ptr<Sentence> diaSentenceCopy(dia->sentence()->clone());
+                    boost::shared_ptr<Sentence> diaCopy(new DiamondOp(diaSentenceCopy, rel));
+                    std::vector<Move> localMoves = findMovesForPELCNFLiteral(d, m, *diaCopy, si, rng);
+                    moves.insert(moves.end(), localMoves.begin(), localMoves.end());
                 }
-                //LOG_PRINT(LOG_ERROR) << "currently cannot handle moves for diamond ops with multiple relations!";
-                //throw std::runtime_error("unimplemented moves found");
+                return moves;
             }
             if (dia->relations().size() == 0) return moves;
             // OK, we've got !<>{r} (phi), whether phi is liquid or an atom it should be relatively the same
@@ -1102,12 +1168,10 @@ std::vector<Move> findMovesForPELCNFLiteral(const Domain& d, const Model& m, con
             } else if (const LiquidOp* liq = dynamic_cast<const LiquidOp*>(&*dia->sentence())) {
                 // normally we can't do this, but slip a negation inside the liquid op since its equivalent
                 boost::shared_ptr<Sentence> insideLiq(liq->sentence()->clone());
-                boost::shared_ptr<Sentence> negInsideLiq(new Negation(insideLiq));
-                // by adding this negation we need to ensure it's moved in
-                negInsideLiq = moveNegationsInward(negInsideLiq);
+//                 negInsideLiq = moveNegationsInward(negInsideLiq);
         //      boost::shared_ptr<Sentence> newLiq(new LiquidOp(negInsideLiq));
                 // satisfy this liq operation now
-                std::vector<Move> localMoves = findMovesForLiquid(d, m, *negInsideLiq, si2);
+                std::vector<Move> localMoves = findMovesForLiquid(d, m, *insideLiq, si2);
                 moves.insert(moves.begin(), localMoves.begin(), localMoves.end());
                 return moves;
             }
